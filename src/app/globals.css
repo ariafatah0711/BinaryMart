@@ -3,31 +3,36 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
+  --hds-color-action: #1060ff;
+  --hds-color-action-hover: #0c56e9;
+  --hds-color-fg-primary: #0c0c0e;
+  --hds-color-fg-secondary: #3b3d45;
+  --hds-color-bg-primary: #ffffff;
+  --hds-color-bg-secondary: #fafafa;
+  --hds-color-success: #008a22;
+  --hds-color-critical: #e52228;
+  --hds-border-primary: rgba(101, 106, 118, 0.2);
+  --hds-radius-sm: 5px;
+  --hds-radius-md: 6px;
+  --hds-shadow-mid: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+  --hds-shadow-low: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03);
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  color: var(--hds-color-fg-primary);
+  background: var(--hds-color-bg-primary);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+/* Technical grid styles */
+.tech-grid {
+  background-size: 20px 20px;
+  background-image: 
+    linear-gradient(to right, rgba(16, 96, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(16, 96, 255, 0.04) 1px, transparent 1px);
+}
+
+.tech-border {
+  border: 1px solid var(--hds-border-primary);
 }
