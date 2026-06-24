@@ -26,7 +26,7 @@ export default function Home() {
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
-          setProducts(data.products);
+          setProducts(data.data?.products ?? data.products ?? []);
           setStatus('connected');
         } else {
           setStatus('failed');

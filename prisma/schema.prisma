@@ -8,9 +8,15 @@ generator client {
   provider = "prisma-client-js"
 }
 
+enum AdminRole {
+  ADMIN
+  SUPER_ADMIN
+}
+
 model Product {
   id             String   @id @default(cuid())
   name           String   @unique
+  slug           String   @unique
   category       String
   brand          String
   price          Float
@@ -20,19 +26,30 @@ model Product {
   description    String   @db.Text
   image          String
   specifications Json     @default("{}")
+  isActive       Boolean  @default(true)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
   @@index([category])
+  @@index([brand])
   @@index([price])
+  @@index([rating])
+  @@index([popularity])
+  @@index([isActive])
 }
 
 model Admin {
-  id        String   @id @default(cuid())
-  username  String   @unique
-  password  String
-  name      String
-  email     String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String    @id @default(cuid())
+  username    String    @unique
+  password    String
+  name        String
+  email       String    @unique
+  role        AdminRole @default(ADMIN)
+  isActive    Boolean   @default(true)
+  lastLoginAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([role])
+  @@index([isActive])
 }

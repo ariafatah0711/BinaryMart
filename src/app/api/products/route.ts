@@ -1,90 +1,90 @@
+import { Prisma } from '@prisma/client';
 import prisma from '@/lib/db';
-import { NextResponse } from 'next/server';
+import { fail, getErrorMessage, ok } from '@/lib/api-response';
+import { ProductSearchTree } from '@/lib/algorithms/bst';
+import { quickSort, SortOrder, withOrder } from '@/lib/algorithms/quicksort';
+import { getCurrentAdminToken } from '@/lib/session';
+import { parseProductInput, ProductCreateInput } from '@/lib/validation';
 
-export async function GET() {
-  try {
-    // 1. Ambil semua data produk dari database Neon
-    const products = await prisma.product.findMany();
+export const dynamic = 'force-dynamic';
 
-    // 2. Jika database kosong, kita sediakan data dummy untuk disisipkan
-    if (products.length === 0) {
-      const dummyProducts = [
-        {
-          name: "ASUS ROG Strix G16",
-          category: "Laptop",
-          brand: "ASUS",
-          price: 24999000,
-          rating: 4.8,
-          popularity: 120,
-          stock: 8,
-          description: "Laptop gaming bertenaga Intel Core i9 Gen 13 dan RTX 4060.",
-          image: "https://images.unsplash.com/photo-1603302576837-37561b2e2302?auto=format&fit=crop&w=500&q=80",
-          specifications: { CPU: "i9-13980HX", RAM: "16GB DDR5", Storage: "1TB SSD", GPU: "RTX 4060 8GB" }
-        },
-        {
-          name: "iPhone 15 Pro",
-          category: "Smartphone",
-          brand: "Apple",
-          price: 20999000,
-          rating: 4.9,
-          popularity: 250,
-          stock: 15,
-          description: "Smartphone premium dengan casing titanium dan chip A17 Pro.",
-          image: "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?auto=format&fit=crop&w=500&q=80",
-          specifications: { Chipset: "A17 Pro", RAM: "8GB", Storage: "256GB", Screen: "6.1 Super Retina" }
-        },
-        {
-          name: "LG UltraGear 27GP850",
-          category: "Monitor",
-          brand: "LG",
-          price: 5499000,
-          rating: 4.7,
-          popularity: 95,
-          stock: 12,
-          description: "Monitor gaming Nano IPS 27 inci dengan refresh rate 165Hz.",
-          image: "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=500&q=80",
-          specifications: { Resolution: "QHD 2560x1440", RefreshRate: "165Hz", Panel: "Nano IPS" }
-        },
-        {
-          name: "Keychron K2 V2",
-          category: "Keyboard",
-          brand: "Keychron",
-          price: 1450000,
-          rating: 4.6,
-          popularity: 180,
-          stock: 20,
-          description: "Keyboard mekanikal wireless 75% layout dengan Gateron Switch.",
-          image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=500&q=80",
-          specifications: { Layout: "75%", Connectivity: "Bluetooth/Wired", Switches: "Gateron Brown" }
-        },
-        {
-          name: "Logitech G Pro X Superlight",
-          category: "Mouse",
-          brand: "Logitech",
-          price: 1999000,
-          rating: 4.8,
-          popularity: 310,
-          stock: 25,
-          description: "Mouse gaming nirkabel super ringan yang didesain untuk atlet esports.",
-          image: "https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=500&q=80",
-          specifications: { Weight: "63g", Sensor: "HERO 25K", Battery: "70 hours" }
-        }
-      ];
+const sortableFields = ['name', 'price', 'rating', 'popularity', 'createdAt'] as const;
+type SortableField = (typeof sortableFields)[number];
 
-      // Insert data dummy secara massal ke database Neon
-      await prisma.product.createMany({
-        data: dummyProducts
-      });
+function getSortField(value: string | null): SortableField {
+  return sortableFields.includes(value as SortableField) ? (value as SortableField) : 'name';
+}
 
-      const initializedProducts = await prisma.product.findMany();
-      return NextResponse.json({ success: true, database: "connected (seeded)", products: initializedProducts });
+function compareProducts(field: SortableField) {
+  return (left: Prisma.ProductGetPayload<object>, right: Prisma.ProductGetPayload<object>) => {
+    const leftValue = left[field];
+    const rightValue = right[field];
+
+    if (leftValue instanceof Date && rightValue instanceof Date) {
+      return leftValue.getTime() - rightValue.getTime();
     }
 
-    return NextResponse.json({ success: true, database: "connected", products });
-  } catch (error: any) {
-    return NextResponse.json(
-      { success: false, database: "failed", error: error.message },
-      { status: 500 }
-    );
+    if (typeof leftValue === 'string' && typeof rightValue === 'string') {
+      return leftValue.localeCompare(rightValue);
+    }
+
+    return Number(leftValue) - Number(rightValue);
+  };
+}
+
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const search = searchParams.get('search')?.trim();
+    const category = searchParams.get('category')?.trim();
+    const sort = getSortField(searchParams.get('sort'));
+    const order: SortOrder = searchParams.get('order') === 'desc' ? 'desc' : 'asc';
+
+    let products = await prisma.product.findMany({
+      where: {
+        isActive: true,
+        ...(category ? { category: { equals: category, mode: 'insensitive' } } : {}),
+      },
+    });
+
+    if (search) {
+      const tree = new ProductSearchTree<(typeof products)[number]>();
+      products.forEach((product) => tree.insert(product));
+      products = tree.search(search);
+    }
+
+    products = quickSort(products, withOrder(compareProducts(sort), order));
+
+    return ok({
+      database: 'connected',
+      meta: {
+        total: products.length,
+        search: search || null,
+        category: category || null,
+        sort,
+        order,
+        algorithm: {
+          search: search ? 'Binary Search Tree' : null,
+          sort: 'QuickSort',
+        },
+      },
+      products,
+    });
+  } catch (error) {
+    return fail(getErrorMessage(error));
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    const admin = await getCurrentAdminToken();
+    if (!admin) return fail('Unauthorized', 401);
+
+    const input = parseProductInput(await request.json()) as ProductCreateInput;
+    const product = await prisma.product.create({ data: input });
+
+    return ok({ product }, { status: 201 });
+  } catch (error) {
+    return fail(getErrorMessage(error), 400);
   }
 }
