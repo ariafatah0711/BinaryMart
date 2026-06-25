@@ -55,14 +55,3 @@ export class ProductSearchTree<T extends SearchableProduct> {
     this.collectMatches(node.right, term, results);
   }
 }
-
-const bst = new ProductSearchTree();
-
-bst.insert({
-  name: "Laptop Asus",
-  category: "Electronics",
-  brand: "Asus",
-});
-
-console.log("TEST");
-console.log(bst.search("asus"));
