@@ -58,7 +58,7 @@ export default function Home() {
             <a href="#database" className="text-sm font-medium text-[#3b3d45] hover:text-[#1060ff] transition-all">Database Status</a>
             <a href="#catalog" className="text-sm font-medium text-[#3b3d45] hover:text-[#1060ff] transition-all">Products</a>
             <a 
-              href="#catalog" 
+              href="/catalog" 
               className="bg-[#1060ff] hover:bg-[#0c56e9] text-white px-4 py-2 text-xs font-semibold rounded-[6px] transition-all shadow-sm flex items-center space-x-2"
             >
               <span>Explore Catalog</span>
