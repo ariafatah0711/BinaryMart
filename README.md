@@ -1,36 +1,137 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+## BinaryMart Backend
+
+BinaryMart uses Next.js App Router API routes with Prisma and PostgreSQL.
 
 ## Getting Started
 
-First, run the development server:
+Install dependencies, then run the app:
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Useful commands:
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+```bash
+npx prisma validate
+npx prisma db push
+npm run seed
+npm run build
+```
 
-## Learn More
+Default seeded admin:
 
-To learn more about Next.js, take a look at the following resources:
+```txt
+username: admin
+password: admin123
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Auth Flow
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+Login endpoint:
 
-## Deploy on Vercel
+```txt
+POST /api/auth/login
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Request body:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+```json
+{
+  "username": "admin",
+  "password": "admin123"
+}
+```
+
+Successful login sets an HTTP-only cookie named `binarymart_admin_token`.
+
+Frontend usage:
+
+```ts
+await fetch('/api/auth/login', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  credentials: 'include',
+  body: JSON.stringify({
+    username: 'admin',
+    password: 'admin123',
+  }),
+});
+```
+
+For protected product routes, send requests with `credentials: 'include'` so the browser includes the auth cookie.
+
+Session/profile endpoints:
+
+```txt
+GET /api/auth/me
+GET /api/admin/me
+POST /api/auth/logout
+```
+
+## Product API
+
+Available routes:
+
+```txt
+GET    /api/products
+POST   /api/products
+GET    /api/products/:id
+PUT    /api/products/:id
+DELETE /api/products/:id
+```
+
+`GET /api/products` supports:
+
+```txt
+?search=rog
+?category=Laptop
+?sort=name|price|rating|popularity|createdAt
+?order=asc|desc
+```
+
+`DELETE /api/products/:id` is a soft delete and sets `isActive = false`.
+
+You can use either Prisma `id` or product `slug` in `:id`.
+
+### Product Request Body
+
+Minimal body shape for create/update:
+
+```json
+{
+  "name": "ASUS ROG Strix G16",
+  "category": "Laptop",
+  "brand": "ASUS",
+  "description": "Laptop gaming bertenaga Intel Core i9 Gen 13 dan RTX 4060.",
+  "image": "https://example.com/product.jpg",
+  "price": 24999000,
+  "rating": 4.8,
+  "popularity": 120,
+  "stock": 8,
+  "specifications": {
+    "CPU": "i9-13980HX",
+    "RAM": "16GB DDR5",
+    "Storage": "1TB SSD"
+  }
+}
+```
+
+Optional fields:
+
+```txt
+slug
+isActive
+```
+
+Validation notes:
+
+```txt
+price >= 0
+rating 0..5
+popularity >= 0
+stock >= 0
+```

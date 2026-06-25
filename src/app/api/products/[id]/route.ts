@@ -11,12 +11,6 @@ interface RouteContext {
   };
 }
 
-function getProductWhere(id: string) {
-  return id.startsWith('c')
-    ? { id }
-    : { slug: id };
-}
-
 export async function GET(_: Request, { params }: RouteContext) {
   try {
     const product = await prisma.product.findFirst({
@@ -49,7 +43,7 @@ export async function PUT(request: Request, { params }: RouteContext) {
 
     const input = parseProductInput(await request.json(), true) as ProductUpdateInput;
     const product = await prisma.product.update({
-      where: getProductWhere(existing.id),
+      where: { id: existing.id },
       data: input,
     });
 
@@ -72,11 +66,12 @@ export async function DELETE(_: Request, { params }: RouteContext) {
 
     if (!existing) return fail('Product not found', 404);
 
-    await prisma.product.delete({
+    const product = await prisma.product.update({
       where: { id: existing.id },
+      data: { isActive: false },
     });
 
-    return ok({ deleted: true });
+    return ok({ deleted: true, product });
   } catch (error) {
     return fail(getErrorMessage(error), 400);
   }
