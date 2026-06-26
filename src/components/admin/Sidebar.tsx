@@ -1,33 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  const handleLogout = async () => {
+  const handleLogout = () => {
     if (isLoggingOut) return;
     setIsLoggingOut(true);
-
-    try {
-      const res = await fetch("/api/auth/logout", {
-        method: "POST",
-      });
-      if (res.ok) {
-        router.push("/admin/login");
-        router.refresh();
-      } else {
-        console.error("Logout failed");
-      }
-    } catch (err) {
-      console.error("Error during logout", err);
-    } finally {
-      setIsLoggingOut(false);
-    }
+    window.location.href = "/api/auth/logout";
   };
 
   const menuItems = [

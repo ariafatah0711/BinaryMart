@@ -1,11 +1,11 @@
-import { ok } from '@/lib/api-response';
+import { NextRequest, NextResponse } from 'next/server';
 import { AUTH_COOKIE_NAME } from '@/lib/session';
 
 export const dynamic = 'force-dynamic';
 
-export async function POST() {
-  const response = ok({ loggedOut: true });
-
+function makeLogoutRedirect(request: NextRequest) {
+  const url = new URL('/admin/login', request.url);
+  const response = NextResponse.redirect(url);
   response.cookies.set(AUTH_COOKIE_NAME, '', {
     httpOnly: true,
     sameSite: 'lax',
@@ -13,6 +13,13 @@ export async function POST() {
     path: '/',
     maxAge: 0,
   });
-
   return response;
+}
+
+export async function GET(request: NextRequest) {
+  return makeLogoutRedirect(request);
+}
+
+export async function POST(request: NextRequest) {
+  return makeLogoutRedirect(request);
 }

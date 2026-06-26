@@ -29,6 +29,15 @@ username: admin
 password: admin123
 ```
 
+## Deployment
+deploy to vercel with CLI:
+
+```bash
+vercel link
+
+vercel --prod
+```
+
 ## Auth Flow
 
 Login endpoint:

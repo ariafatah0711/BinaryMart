@@ -7,20 +7,25 @@
     "build": "next build",
     "start": "next start",
     "seed": "node prisma/seed.js",
-    "lint": "next lint"
+    "lint": "next lint",
+    "env": "node src/scripts/push-env.mjs",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@prisma/client": "5.15.0",
-    "next": "^14.2.35",
+    "next": "^14.2.21",
     "react": "^18",
     "react-dom": "^18"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
   },
   "devDependencies": {
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "eslint": "^8",
-    "eslint-config-next": "^16.2.9",
+    "eslint-config-next": "^14.2.21",
     "postcss": "^8",
     "prisma": "5.15.0",
     "tailwindcss": "^3.4.1",
