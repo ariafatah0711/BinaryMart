@@ -12,15 +12,20 @@ for (const line of content.split("\n")) {
   if (!trimmed || trimmed.startsWith("#")) continue;
   const eqIdx = trimmed.indexOf("=");
   if (eqIdx === -1) continue;
-  const key = trimmed.slice(0, eqIdx).trim();
-  const val = trimmed.slice(eqIdx + 1).trim();
+  let key = trimmed.slice(0, eqIdx).trim();
+  let val = trimmed.slice(eqIdx + 1).trim();
+  if (val.startsWith('"') && val.endsWith('"')) val = val.slice(1, -1);
+  if (val.startsWith("'") && val.endsWith("'")) val = val.slice(1, -1);
   if (key) env[key] = val;
 }
 
 for (const [key, value] of Object.entries(env)) {
   console.log(`Uploading ${key}...`);
-  execSync(`echo "${value}" | vercel env add ${key} ${target}`, {
+  const tmp = `env-${key}.tmp`;
+  fs.writeFileSync(tmp, value, "utf-8");
+  execSync(`type ${tmp} | vercel env add ${key} ${target} --force`, {
     stdio: "inherit",
     shell: true,
   });
+  fs.unlinkSync(tmp);
 }
