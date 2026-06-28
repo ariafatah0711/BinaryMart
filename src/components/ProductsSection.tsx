@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ProductImage from "@/components/ProductImage";
 
 interface Product {
   id: string;
@@ -15,9 +16,23 @@ interface Product {
 
 interface ProductsSectionProps {
   products: Product[];
+  isLoading?: boolean;
 }
 
-export default function ProductsSection({ products }: ProductsSectionProps) {
+export default function ProductsSection({ products, isLoading }: ProductsSectionProps) {
+  if (isLoading) {
+    return (
+      <section id="catalog" className="py-20 bg-slate-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center py-16">
+            <div className="animate-spin h-6 w-6 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-3" />
+            <p className="text-sm text-slate-400">Loading products...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   if (products.length === 0) {
     return (
       <section id="catalog" className="py-20 bg-slate-50">
@@ -61,7 +76,7 @@ export default function ProductsSection({ products }: ProductsSectionProps) {
               className="group bg-white rounded-xl border border-slate-200 hover:border-blue-200 hover:shadow-lg hover:shadow-blue-100/50 transition-all overflow-hidden flex flex-col"
             >
               <div className="relative h-52 bg-slate-100 overflow-hidden">
-                <img
+                <ProductImage
                   src={product.image}
                   alt={product.name}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"

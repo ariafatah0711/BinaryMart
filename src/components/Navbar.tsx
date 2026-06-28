@@ -1,16 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 
-interface NavbarProps {
-  dbStatus?: "connecting" | "connected" | "failed";
-  dbError?: string | null;
-}
-
-export default function Navbar({ dbStatus, dbError }: NavbarProps) {
-  const [showError, setShowError] = useState(false);
-
+export default function Navbar() {
   return (
     <nav className="tech-border bg-white/90 backdrop-blur sticky top-0 z-50 border-t-0 border-x-0 border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -24,45 +16,10 @@ export default function Navbar({ dbStatus, dbError }: NavbarProps) {
         </Link>
 
         <div className="flex items-center space-x-6">
-          <a href="/#features" className="text-sm font-medium text-[#3b3d45] hover:text-[#1060ff] transition-all hidden sm:inline">Features</a>
-          <a href="/#catalog" className="text-sm font-medium text-[#3b3d45] hover:text-[#1060ff] transition-all hidden sm:inline">Products</a>
+          <Link href="/" className="text-sm font-medium text-[#3b3d45] hover:text-[#1060ff] transition-all hidden sm:inline">Home</Link>
           <Link href="/catalog" className="text-sm font-medium text-[#3b3d45] hover:text-[#1060ff] transition-all hidden sm:inline">Catalog</Link>
           <Link href="/algorithms" className="text-sm font-medium text-[#3b3d45] hover:text-[#1060ff] transition-all hidden sm:inline">Algorithms</Link>
           <Link href="/admin/login" className="text-sm font-medium text-[#3b3d45] hover:text-[#1060ff] transition-all hidden sm:inline">Admin</Link>
-
-          {dbStatus && (
-            <div className="ml-2">
-              {dbStatus === "connected" && (
-                <div className="flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-green-50 border border-green-200">
-                  <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                  <span className="text-green-700 font-medium whitespace-nowrap">DB Online</span>
-                </div>
-              )}
-              {dbStatus === "connecting" && (
-                <div className="flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-yellow-50 border border-yellow-200">
-                  <span className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></span>
-                  <span className="text-yellow-600 font-medium">DB...</span>
-                </div>
-              )}
-              {dbStatus === "failed" && (
-                <div className="relative">
-                  <button
-                    onClick={() => setShowError(!showError)}
-                    className="flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-red-50 border border-red-200 hover:bg-red-100 transition-colors cursor-pointer"
-                  >
-                    <span className="w-2 h-2 rounded-full bg-red-500"></span>
-                    <span className="text-red-700 font-medium whitespace-nowrap">DB Offline</span>
-                  </button>
-                  {showError && dbError && (
-                    <div className="absolute right-0 top-full mt-2 w-72 bg-white border border-red-200 rounded-lg shadow-lg p-3 text-xs text-red-700 z-50">
-                      <p className="font-medium mb-1">Connection Failed</p>
-                      <p className="text-red-600 break-words">{dbError}</p>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
 
           <Link
             href="/catalog"

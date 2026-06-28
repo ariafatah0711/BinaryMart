@@ -1,3 +1,5 @@
+Sistem Katalog Produk Elektronik Menggunakan Binary Search Tree dan Quick Sort
+
 ## BinaryMart Backend
 
 BinaryMart uses Next.js App Router API routes with Prisma and PostgreSQL.
